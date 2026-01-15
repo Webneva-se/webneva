@@ -4,220 +4,323 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function Home() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [showModal, setShowModal] = useState(false)
-  const [modalType, setModalType] = useState(null) // 'enhance' eller 'create'
+  const [modalType, setModalType] = useState(null)
   const [userInput, setUserInput] = useState('')
   const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [activeFeature, setActiveFeature] = useState(0)
   const router = useRouter()
 
-  // Glow-effekt som följer musen
+  // Roterande features
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
+    const interval = setInterval(() => {
+      setActiveFeature((prev) => (prev + 1) % 3)
+    }, 3000)
+    return () => clearInterval(interval)
   }, [])
 
-  // Öppna modal för kodförbättring
   const openEnhanceModal = () => {
     setModalType('enhance')
     setShowModal(true)
   }
 
-  // Öppna modal för att skapa ny sida
   const openCreateModal = () => {
     setModalType('create')
     setShowModal(true)
   }
 
-  // Skicka till studio med data
   const handleSubmit = async () => {
-    if (!userInput.trim() && modalType === 'enhance') {
-      return alert('Vänligen klistra in din kod först!')
-    }
     if (!description.trim()) {
       return alert('Vänligen beskriv vad du vill göra!')
     }
 
     setIsLoading(true)
 
-    // Spara data
     localStorage.setItem('webneva_mode', modalType)
-    localStorage.setItem('webneva_code', modalType === 'enhance' ? userInput : '')
+    if (modalType === 'enhance') {
+      localStorage.setItem('webneva_code', userInput)
+    }
     localStorage.setItem('webneva_description', description)
 
-    // Navigera till studio
+    // Simulera laddning
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
     router.push('/studio')
   }
 
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white font-sans">
-      {/* Glow som följer musen */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 transition-all duration-300"
-        style={{
-          background: `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(0,150,255,0.15), transparent 70%)`,
-        }}
-      ></div>
+  const features = [
+    {
+      title: "AI-Powered Development",
+      description: "Använd avancerad AI för att generera, förbättra och optimera din kod i realtid.",
+      icon: "🤖",
+      color: "from-blue-500 to-cyan-500"
+    },
+    {
+      title: "Live Preview",
+      description: "Se din webbplats byggas i realtid medan AI:en kodar. Ingen väntan, bara resultat.",
+      icon: "🚀",
+      color: "from-purple-500 to-pink-500"
+    },
+    {
+      title: "Professional Quality",
+      description: "Få produktionsredo kod med moderna standarder, responsiv design och hög prestanda.",
+      icon: "⭐",
+      color: "from-green-500 to-emerald-500"
+    }
+  ]
 
-      {/* Bakgrund – AI vågor */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,120,255,0.1),_transparent_70%)] animate-pulse blur-3xl opacity-60"></div>
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+      </div>
 
       {/* Header */}
-      <header className="relative z-10 flex justify-between items-center px-8 py-6">
-        <div className="flex items-center gap-3">
-          <img src="/webneva-logo.png" alt="Webneva Logo" className="w-10 h-10" />
-          <h1 className="text-2xl font-bold tracking-wide">Webneva</h1>
+      <header className="relative z-10">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                <span className="text-lg font-bold">W</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Webneva
+                </h1>
+                <p className="text-xs text-gray-400">AI Web Development</p>
+              </div>
+            </div>
+            
+            <nav className="hidden md:flex gap-8">
+              <Link href="#features" className="text-gray-300 hover:text-white transition-colors">Features</Link>
+              <Link href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">How it works</Link>
+              <Link href="#examples" className="text-gray-300 hover:text-white transition-colors">Examples</Link>
+              <button className="px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
+                Sign in
+              </button>
+            </nav>
+          </div>
         </div>
-        <nav className="flex gap-6">
-          <Link href="/about" className="hover:text-blue-400 transition-colors">Om</Link>
-          <Link href="/examples" className="hover:text-blue-400 transition-colors">Exempel</Link>
-          <Link href="/pricing" className="hover:text-blue-400 transition-colors">Priser</Link>
-        </nav>
       </header>
 
-      {/* Hero */}
-      <section className="relative z-10 flex flex-col items-center justify-center text-center py-20 px-6">
-        <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text font-semibold tracking-widest uppercase text-sm mb-3">
-          AI-Powered Web Development
-        </span>
-
-        <h2 className="text-5xl sm:text-6xl font-extrabold mb-4">
-          Skapa & Förbättra <span className="text-blue-400">Webbplatser</span> med AI
-        </h2>
-
-        <p className="text-gray-400 text-lg max-w-2xl mb-12 leading-relaxed">
-          Använd <span className="text-blue-400 font-semibold">OpenAI GPT-4</span> och{' '}
-          <span className="text-purple-400 font-semibold">DeepSeek</span> för att generera, 
-          förbättra och se live preview av din kod i realtid.
-        </p>
-
-        {/* Knappval */}
-        <div className="flex flex-col sm:flex-row gap-5 mb-16">
-          <button
-            onClick={openEnhanceModal}
-            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl font-semibold hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-blue-500/30"
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Förbättra Din Kod
+      {/* Hero Section */}
+      <section className="relative z-10 py-20 px-6">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-gray-800/50 border border-gray-700 px-4 py-2 rounded-full mb-6">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              <span className="text-sm">AI-Powered Web Development Platform</span>
             </div>
-            <p className="text-sm font-normal mt-1 opacity-80">Klistra in befintlig kod för AI-optimering</p>
-          </button>
-          
-          <button
-            onClick={openCreateModal}
-            className="px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700 rounded-xl font-semibold hover:scale-105 transition-all duration-300 hover:border-gray-600"
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Skapa Ny Webbplats
-            </div>
-            <p className="text-sm font-normal mt-1 opacity-80">Beskriv din idé - AI genererar koden</p>
-          </button>
-        </div>
+            
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+              Build Better Websites
+              <br />
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                With AI Magic
+              </span>
+            </h1>
+            
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-10">
+              Transform your ideas into fully functional websites instantly. 
+              Whether you have existing code or just an idea, Webneva's AI will create, 
+              enhance, and deploy for you.
+            </p>
 
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl">
-          <div className="bg-gray-900/40 border border-gray-800 p-6 rounded-xl">
-            <div className="bg-blue-500/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+            {/* Main CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-5 justify-center mb-20">
+              <button
+                onClick={openCreateModal}
+                className="group relative px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl font-semibold text-lg hover:scale-105 transition-all duration-300"
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Create New Website</span>
+                </div>
+                <p className="text-sm font-normal mt-1 opacity-80">Describe your idea, get a website</p>
+              </button>
+              
+              <button
+                onClick={openEnhanceModal}
+                className="group relative px-8 py-4 bg-gray-800/50 border-2 border-gray-700 rounded-xl font-semibold text-lg hover:border-blue-500 hover:bg-gray-800 transition-all duration-300"
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <span>Enhance Existing Code</span>
+                </div>
+                <p className="text-sm font-normal mt-1 opacity-80">Paste code, get improvements</p>
+              </button>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Live Preview</h3>
-            <p className="text-gray-400">Se din hemsida byggas i realtid medan AI:en kodar</p>
           </div>
-          
-          <div className="bg-gray-900/40 border border-gray-800 p-6 rounded-xl">
-            <div className="bg-purple-500/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
+
+          {/* Features Showcase */}
+          <div id="features" className="mb-20">
+            <h2 className="text-3xl font-bold text-center mb-12">Why Choose Webneva?</h2>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {features.map((feature, index) => (
+                <div 
+                  key={index}
+                  className={`relative p-6 rounded-2xl border-2 transition-all duration-300 ${
+                    activeFeature === index 
+                      ? 'border-blue-500/50 bg-gray-800/30' 
+                      : 'border-gray-800 bg-gray-900/30'
+                  }`}
+                  onMouseEnter={() => setActiveFeature(index)}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-5 rounded-2xl`}></div>
+                  
+                  <div className="relative z-10">
+                    <div className="text-4xl mb-4">{feature.icon}</div>
+                    <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+                    <p className="text-gray-400">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <h3 className="text-xl font-semibold mb-2">AI Optimering</h3>
-            <p className="text-gray-400">Få din kod analyserad och förbättrad av avancerad AI</p>
           </div>
-          
-          <div className="bg-gray-900/40 border border-gray-800 p-6 rounded-xl">
-            <div className="bg-green-500/20 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+
+          {/* How it works */}
+          <div id="how-it-works" className="mb-20">
+            <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+            
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">1</span>
+                </div>
+                <h3 className="font-bold mb-2">Describe or Paste</h3>
+                <p className="text-gray-400 text-sm">Tell us what you want or paste your existing code</p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">2</span>
+                </div>
+                <h3 className="font-bold mb-2">AI Magic</h3>
+                <p className="text-gray-400 text-sm">Our AI analyzes and generates optimized code</p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-cyan-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">3</span>
+                </div>
+                <h3 className="font-bold mb-2">Live Preview</h3>
+                <p className="text-gray-400 text-sm">Watch your website being built in real-time</p>
+              </div>
+              
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">4</span>
+                </div>
+                <h3 className="font-bold mb-2">Download & Deploy</h3>
+                <p className="text-gray-400 text-sm">Get production-ready code or deploy directly</p>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold mb-2">Enkelt Exportera</h3>
-            <p className="text-gray-400">Ladda ner komplett kod eller deploy direkt till Vercel</p>
           </div>
         </div>
       </section>
 
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-gray-800 pt-12 pb-8">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                  <span className="text-lg font-bold">W</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">Webneva</h2>
+                  <p className="text-gray-400 text-sm">AI-Powered Web Development</p>
+                </div>
+              </div>
+              <p className="text-gray-500 max-w-md">
+                Transforming ideas into reality with the power of artificial intelligence.
+              </p>
+            </div>
+            
+            <div className="flex gap-6">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Twitter</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">GitHub</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Discord</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+            <p>© {new Date().getFullYear()} Webneva. All rights reserved.</p>
+            <p className="mt-2">Powered by OpenAI & DeepSeek AI technologies</p>
+          </div>
+        </div>
+      </footer>
+
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slideUp">
             <div className="p-6 border-b border-gray-800">
               <div className="flex justify-between items-center">
-                <h3 className="text-2xl font-bold">
-                  {modalType === 'enhance' ? 'Förbättra Din Kod' : 'Skapa Ny Webbplats'}
-                </h3>
+                <div>
+                  <h3 className="text-2xl font-bold">
+                    {modalType === 'enhance' ? 'Enhance Your Code' : 'Create New Website'}
+                  </h3>
+                  <p className="text-gray-400 mt-1">
+                    {modalType === 'enhance' 
+                      ? 'Paste your code and tell us what to improve'
+                      : 'Describe your dream website in detail'}
+                  </p>
+                </div>
                 <button
                   onClick={() => setShowModal(false)}
                   className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-              <p className="text-gray-400 mt-2">
-                {modalType === 'enhance' 
-                  ? 'Klistra in din kod och beskriv vad du vill förbättra'
-                  : 'Beskriv i detalj hur du vill att din hemsida ska se ut och fungera'}
-              </p>
             </div>
 
             <div className="p-6">
               {modalType === 'enhance' && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Klistra in din nuvarande kod
+                    Paste Your Code
                   </label>
                   <textarea
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="// Klistra in din HTML, CSS, JavaScript eller React kod här...
-// Du kan klistra in flera filer om du har en större projektstruktur"
+                    placeholder="// Paste your HTML, CSS, JavaScript, React, etc...
+// You can paste multiple files or entire projects"
                     className="w-full h-48 bg-gray-950 border border-gray-800 rounded-lg p-4 text-gray-200 font-mono text-sm outline-none focus:border-blue-500 resize-none"
                     spellCheck="false"
                   />
-                  <p className="text-gray-500 text-sm mt-2">
-                    Stödjer: HTML, CSS, JavaScript, React, Next.js, Tailwind CSS
-                  </p>
                 </div>
               )}
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   {modalType === 'enhance' 
-                    ? 'Beskriv vad du vill förbättra eller ändra:'
-                    : 'Beskriv din hemsida i detalj:'}
+                    ? 'What would you like to improve?'
+                    : 'Describe your website in detail:'}
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder={
                     modalType === 'enhance'
-                      ? 'Exempel: "Gör sidan mer responsiv, lägg till mörkt läge, optimera för mobil"'
-                      : 'Exempel: "Jag vill ha en restauranghemsida för min italienska restaurang Aldieve i Borlänge på Drottningsgatan. Den ska ha meny, bildgalleri, kontaktformulär och bokningssystem. Färgschema: rött, vitt och svart. Modern design med matbilder."'
+                      ? 'Example: "Make it responsive, add dark mode, improve performance, fix mobile layout..."'
+                      : 'Example: "I want a restaurant website for Aldieve Italian restaurant in Borlänge. Include menu, gallery, contact form, booking system. Colors: red, white, black. Modern design with food photos."'
                   }
-                  className="w-full h-32 bg-gray-950 border border-gray-800 rounded-lg p-4 text-gray-200 outline-none focus:border-blue-500 resize-none"
+                  className="w-full h-40 bg-gray-950 border border-gray-800 rounded-lg p-4 text-gray-200 outline-none focus:border-blue-500 resize-none"
                 />
               </div>
 
@@ -226,11 +329,11 @@ export default function Home() {
                   onClick={() => setShowModal(false)}
                   className="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition-colors"
                 >
-                  Avbryt
+                  Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={isLoading || (!userInput && modalType === 'enhance') || !description.trim()}
+                  disabled={isLoading || !description.trim()}
                   className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isLoading ? (
@@ -239,11 +342,11 @@ export default function Home() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Bearbetar...
+                      Processing...
                     </>
                   ) : (
                     <>
-                      Fortsätt till Studio
+                      Continue to Studio
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
@@ -255,28 +358,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="relative z-10 py-10 text-center text-gray-500 text-sm border-t border-gray-800 mt-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <img src="/webneva-logo.png" alt="Webneva Logo" className="w-8 h-8" />
-              <span className="font-semibold text-white">Webneva</span>
-            </div>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-blue-400 transition-colors">Integritetspolicy</a>
-              <a href="#" className="hover:text-blue-400 transition-colors">Användarvillkor</a>
-              <a href="#" className="hover:text-blue-400 transition-colors">Kontakt</a>
-            </div>
-          </div>
-          <p className="mt-6">
-            © {new Date().getFullYear()} Webneva — Powered by{' '}
-            <span className="text-blue-400">OpenAI</span> &{' '}
-            <span className="text-purple-400">DeepSeek</span>.
-          </p>
-        </div>
-      </footer>
     </main>
   )
 }
